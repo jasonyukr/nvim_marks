@@ -180,7 +180,7 @@ fn main() {
             if (field_n >= 0x30 && field_n <= 0x39) || (field_n >= 0x41 && field_n <= 0x5A) || (field_n >= 0x61 && field_n <= 0x7A) {
                 if field_f.len() > 0 && field_f[0] == b'/' {
                     match str::from_utf8(&field_f) {
-                        Ok(v) => println!("{}\t{}\t{}", char::from_u32(field_n as u32).unwrap(), v, field_l),
+                        Ok(v) => println!("{}\t{}\t{}", char::from_u32(field_n as u32).unwrap(), field_l, v),
                         Err(_) => panic!("utf8 convert fail"),
                     }
                 }
