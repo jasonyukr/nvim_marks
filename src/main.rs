@@ -176,8 +176,8 @@ fn main() {
                 }
             }
 
-            // Use 0~9 A-Z a-z only
-            if (field_n >= 0x30 && field_n <= 0x39) || (field_n >= 0x41 && field_n <= 0x5A) || (field_n >= 0x61 && field_n <= 0x7A) {
+            // Use [A-Za-z]
+            if (field_n >= 0x41 && field_n <= 0x5A) || (field_n >= 0x61 && field_n <= 0x7A) {
                 if field_f.len() > 0 && field_f[0] == b'/' {
                     match str::from_utf8(&field_f) {
                         Ok(v) => println!("{}\t{}\t{}", char::from_u32(field_n as u32).unwrap(), field_l, v),
