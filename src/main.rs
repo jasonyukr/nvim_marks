@@ -68,6 +68,8 @@ fn read_uint<R: BufRead>(reader: &mut R) -> (usize, usize) {
 }
 
 fn main() {
+    let home_dir = env::var("HOME").unwrap();
+
     let args: Vec<_> = env::args().collect();
     let file: File;
     if let Some(path) = env::home_dir() {
@@ -180,7 +182,17 @@ fn main() {
             if (field_n >= 0x41 && field_n <= 0x5A) || (field_n >= 0x61 && field_n <= 0x7A) {
                 if field_f.len() > 0 && field_f[0] == b'/' {
                     match str::from_utf8(&field_f) {
-                        Ok(v) => println!("{}\t{}\t{}", char::from_u32(field_n as u32).unwrap(), field_l, v),
+                        Ok(v) => {
+                            if let Some(pos) = v.find(&home_dir) {
+                                if pos == 0 {
+                                    println!("{}\t{}\t{}", char::from_u32(field_n as u32).unwrap(), field_l, v.replacen(&home_dir, "~", 1))
+                                } else {
+                                    println!("{}\t{}\t{}", char::from_u32(field_n as u32).unwrap(), field_l, v)
+                                }
+                            } else {
+                                println!("{}\t{}\t{}", char::from_u32(field_n as u32).unwrap(), field_l, v)
+                            }
+                        },
                         Err(_) => panic!("utf8 convert fail"),
                     }
                 }
