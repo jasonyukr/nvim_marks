@@ -89,6 +89,7 @@ fn main() {
     let mut cnt = 1;
     loop {
         let mut entry_type = [0u8; 2];
+        let mut dummy = [0u8; 4];
         let mut timestamp = [0u8; 4];
         let mut tag = [0u8];
         let mut key = [0u8];
@@ -104,14 +105,15 @@ fn main() {
 
         if DEBUG {
             cnt = cnt + 1;
-            println!("iter={} entry_type={:#02x}{:#02x}", cnt, entry_type[0], entry_type[1]);
+            println!("iter={} entry_type= {:#02x} {:#02x}", cnt, entry_type[0], entry_type[1]);
         }
 
-        if entry_type[1] == 0xCE && (entry_type[0] == 0x07 || entry_type[0] == 0x0A) { // GlobalMark or LocalMark
+        if (entry_type[1] == 0xCE || entry_type[1] == 0xCF) && (entry_type[0] == 0x07 || entry_type[0] == 0x0A) { // GlobalMark or LocalMark
+            read_fully(&mut reader, &mut dummy).expect("dummy");
             read_fully(&mut reader, &mut timestamp).expect("timestamp");
             (total_length, _) = read_uint(&mut reader);
             if DEBUG {
-                println!("0x0ACE length={}", total_length);
+                println!("0x0ACE|0x0ACF length={}", total_length);
             }
 
             /*
@@ -212,13 +214,14 @@ fn main() {
                 panic!("unexpected type: entry_type={:x?}", entry_type);
             }
             // I found this case (0x0A,0x00) from actual shada data. There's no timestamp.
-            // I presume that non-0xCE value (like 0x00) means timestamp skip
+            // I presume that non-0xCE or non-0xCF value (like 0x00) means timestamp skip
             (total_length, _) = read_uint(&mut reader);
             if DEBUG {
                 println!("0x??00 length={}", total_length);
             }
             reader.seek_relative(total_length as i64).expect("seek");
         } else {
+            read_fully(&mut reader, &mut dummy).expect("dummy");
             read_fully(&mut reader, &mut timestamp).expect("timestamp");
             if entry_type[0] > 11 {
                 panic!("unexpected type: entry_type={:x?} timestamp={:x?}", entry_type, timestamp);
